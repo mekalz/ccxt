@@ -189,6 +189,9 @@ module.exports = class kraken extends Exchange {
                     ],
                 },
             },
+            'commonCurrencies': {
+                'XDG': 'DOGE',
+            },
             'options': {
                 'cacheDepositMethodsOnFetchDepositAddress': true, // will issue up to two calls in fetchDepositAddress
                 'depositMethods': {},
@@ -255,10 +258,16 @@ module.exports = class kraken extends Exchange {
             let quoteId = market['quote'];
             let base = baseId;
             let quote = quoteId;
-            if ((base[0] === 'X') || (base[0] === 'Z'))
-                base = base.slice (1);
-            if ((quote[0] === 'X') || (quote[0] === 'Z'))
-                quote = quote.slice (1);
+            if (base.length > 3) {
+                if ((base[0] === 'X') || (base[0] === 'Z')) {
+                    base = base.slice (1);
+                }
+            }
+            if (quote.length > 3) {
+                if ((quote[0] === 'X') || (quote[0] === 'Z')) {
+                    quote = quote.slice (1);
+                }
+            }
             base = this.commonCurrencyCode (base);
             quote = this.commonCurrencyCode (quote);
             let darkpool = id.indexOf ('.d') >= 0;
@@ -988,10 +997,12 @@ module.exports = class kraken extends Exchange {
         if (numResults < 1)
             throw new InvalidAddress (this.id + ' privatePostDepositAddresses() returned no addresses');
         let address = this.safeString (result[0], 'address');
+        let tag = this.safeString2 (result[0], 'tag', 'memo');
         this.checkAddress (address);
         return {
             'currency': code,
             'address': address,
+            'tag': tag,
             'info': response,
         };
     }

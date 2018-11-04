@@ -189,6 +189,9 @@ class kraken extends Exchange {
                     ),
                 ),
             ),
+            'commonCurrencies' => array (
+                'XDG' => 'DOGE',
+            ),
             'options' => array (
                 'cacheDepositMethodsOnFetchDepositAddress' => true, // will issue up to two calls in fetchDepositAddress
                 'depositMethods' => array (),
@@ -255,10 +258,16 @@ class kraken extends Exchange {
             $quoteId = $market['quote'];
             $base = $baseId;
             $quote = $quoteId;
-            if (($base[0] === 'X') || ($base[0] === 'Z'))
-                $base = mb_substr ($base, 1);
-            if (($quote[0] === 'X') || ($quote[0] === 'Z'))
-                $quote = mb_substr ($quote, 1);
+            if (strlen ($base) > 3) {
+                if (($base[0] === 'X') || ($base[0] === 'Z')) {
+                    $base = mb_substr ($base, 1);
+                }
+            }
+            if (strlen ($quote) > 3) {
+                if (($quote[0] === 'X') || ($quote[0] === 'Z')) {
+                    $quote = mb_substr ($quote, 1);
+                }
+            }
             $base = $this->common_currency_code($base);
             $quote = $this->common_currency_code($quote);
             $darkpool = mb_strpos ($id, '.d') !== false;
@@ -988,10 +997,12 @@ class kraken extends Exchange {
         if ($numResults < 1)
             throw new InvalidAddress ($this->id . ' privatePostDepositAddresses() returned no addresses');
         $address = $this->safe_string($result[0], 'address');
+        $tag = $this->safe_string_2($result[0], 'tag', 'memo');
         $this->check_address($address);
         return array (
             'currency' => $code,
             'address' => $address,
+            'tag' => $tag,
             'info' => $response,
         );
     }
